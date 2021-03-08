@@ -1,0 +1,10 @@
+# train and val datasets (image directory or *.txt file with image paths)
+train: /mnt/data/DATASETS/image-object-detection-datasets/crowd-human/yolo/visible_head/train
+val: /mnt/data/DATASETS/image-object-detection-datasets/crowd-human/yolo/visible_head/val
+test: /mnt/data/DATASETS/image-object-detection-datasets/crowd-human/yolo/visible_head/test
+
+# number of classes
+nc: 2
+
+# class names
+names: ['person', 'head']

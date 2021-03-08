@@ -1,0 +1,78 @@
+version: "2.3"
+
+services:
+    base:
+        image: scaledyolo4:0.1.0
+        build:
+            context: ..
+            dockerfile: docker/Dockerfile
+        container_name: scaledyolo4-base
+        ipc: host
+        runtime: nvidia
+        volumes:
+            - $PWD:/workdir
+            - /mnt/data:/mnt/data
+            - /media:/media
+        environment:
+            - DEBUG_COLORS="true"
+            - TERM=xterm-256color
+            - COLORTERM=truecolor
+
+    dev:
+        container_name: scaledyolo4-dev
+        extends:
+            service: base
+        ports:
+            - ${PORT:-6006}:${PORT:-6006}
+        stdin_open: true
+        tty: true
+
+    tb:
+        container_name: yolo-tb
+        extends:
+            service: base
+        ports:
+            - ${PORT:-6007}:${PORT:-6007}
+        command: tensorboard --logdir /home/braincreator/ioannis/ScaledYOLOv4/runs/exp0/ --port ${PORT:-6007} --bind_all
+
+    triton-client-server:
+        image: detectron2_triton_client_server:1.2
+        build:
+            context: ..
+            dockerfile: docker/Dockerfile.triton_client_server
+        container_name: detectron2-triton-client-server
+        ipc: host
+        runtime: nvidia
+        volumes:
+            - $PWD/:/workdir
+            - ${LABEL_MAPPING_FILE:-/dev/null}:/resources/label_mapping.json
+        environment:
+            - HOST=${HOST:-0.0.0.0}
+            - TRITON_HOST=${DISPLAY:-192.168.1.113}
+            - TRITON_PORT=${DISPLAY:-8001}
+            - TRITON_MODEL_PROTOCOL=${DISPLAY:-gRPC}
+            - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+        ports:
+            - ${PORT:-8080}:${PORT:-8080}
+        command: >
+            bash -c "cd /workdir/server/client-server/app && uvicorn main:app --host=${HOST:-0.0.0.0} --port=${PORT:-8080}"
+
+
+    triton-model-server:
+        image: detectron2_triton_model_server:1.2
+        build:
+            context: ..
+            dockerfile: docker/Dockerfile.triton_model_server
+        container_name: detectron2-triton-model-server
+        ipc: host
+        runtime: nvidia
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=0
+        volumes:
+            - ${TRT_MODEL_DIR:-/dev/null}:/models
+        ports:
+            - ${HTTP_PORT:-8000}:${HTTP_PORT:-8000}
+            - ${gRPC_PORT:-8001}:${gRPC_PORT:-8001}
+            - ${METRICS_PORT:-8002}:${METRICS_PORT:-8002}
+        command: >
+            bash -c "tritonserver --http-port=${HTTP_PORT:-8000} --grpc-port=${gRPC_PORT:-8001} --metrics-port=${METRICS_PORT:-8002} --model-repository=/models --strict-model-config=false --model-control-mode=explicit --load-model=detector --log-verbose=0"

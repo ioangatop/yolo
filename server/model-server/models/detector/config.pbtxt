@@ -1,0 +1,68 @@
+name: "detector"
+platform: "ensemble"
+max_batch_size: 1
+version_policy {
+	latest {
+		num_versions: 1
+	}
+}
+input [
+	{
+		name: "DALI_INPUT"
+		data_type: TYPE_UINT8
+		dims: [ -1 ]
+	}
+]
+output [
+	{
+		name: "DALI_INPUT_DIM"
+		data_type: TYPE_FP32
+		dims: [ 3 ]
+	},
+	{
+		name: "DALI_IMAGE_DIM"
+		data_type: TYPE_FP32
+		dims: [ 3 ]
+	},
+	{
+		name: "MODEL_OUTPUT"
+		data_type: TYPE_FP32
+		dims: [ 1, 112896, 7 ]
+	}
+]
+ensemble_scheduling {
+	step [
+		{
+			model_name: "dali"
+			model_version: -1
+			input_map {
+				key: "DALI_INPUT_0"
+				value: "DALI_INPUT"
+			}
+			output_map {
+				key: "DALI_OUTPUT_0"
+				value: "DALI_IMAGE"
+			}
+			output_map {
+				key: "DALI_OUTPUT_1"
+				value: "DALI_INPUT_DIM"
+			}
+			output_map {
+				key: "DALI_OUTPUT_2"
+				value: "DALI_IMAGE_DIM"
+			}
+		},
+		{
+			model_name: "model"
+			model_version: -1
+			input_map {
+				key: "input"
+				value: "DALI_IMAGE"
+			}
+			output_map {
+				key: "output"
+				value: "MODEL_OUTPUT"
+			}
+		}
+	]
+}

@@ -1,0 +1,27 @@
+ name: "dali"
+ backend: "dali"
+ max_batch_size: 1
+ input [
+    {
+        name: "DALI_INPUT_0"
+        data_type: TYPE_UINT8
+        dims: [ -1 ]
+    }
+ ]
+ output [
+    {
+        name: "DALI_OUTPUT_0"
+        data_type: TYPE_FP32
+        dims: [ 3, 896, 1536 ]
+    },
+    {
+        name: "DALI_OUTPUT_1"
+        data_type: TYPE_FP32
+        dims: [ 3 ]
+    },
+    {
+        name: "DALI_OUTPUT_2"
+        data_type: TYPE_FP32
+        dims: [ 3 ]
+    }
+]

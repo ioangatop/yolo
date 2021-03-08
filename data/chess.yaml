@@ -1,0 +1,12 @@
+# train and val datasets (image directory or *.txt file with image paths)
+train: /media/braincreator/bigdata01/DATASETS/object-detection-datasets/yolo/chess/train/
+val: /media/braincreator/bigdata01/DATASETS/object-detection-datasets/yolo/chess/valid/
+test: /media/braincreator/bigdata01/DATASETS/object-detection-datasets/yolo/chess/test/
+
+# number of classes
+nc: 12
+
+# class names
+names: ['black-bishop', 'black-king', 'black-knight', 'black-pawn', 'black-queen', 
+        'black-rook', 'white-bishop', 'white-king', 'white-knight', 'white-pawn',
+        'white-queen', 'white-rook']

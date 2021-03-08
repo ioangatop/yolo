@@ -1,0 +1,45 @@
+name: "model"
+platform: "onnxruntime_onnx"
+max_batch_size: 0
+version_policy {
+	latest {
+		num_versions: 1
+	}
+}
+input [
+	{
+		name: "input"
+		data_type: TYPE_FP32
+		dims: [ 1, 3, 896, 1536 ]
+	}
+]
+output [
+	{
+		name: "output"
+		data_type: TYPE_FP32
+		dims: [ 1, 112896, 7 ]
+	}
+]
+model_warmup [
+    {
+        name: "model_warmup"
+        batch_size: 1
+        inputs: [
+			{
+				key: "input"
+				value: 
+					{
+						data_type: TYPE_FP32
+						dims: [ 1, 3, 896, 1536 ]
+						random_data: true
+					}
+			}
+		]
+    }
+]
+instance_group [
+	{
+		count: 1
+		kind: KIND_GPU gpus: [ 0 ]
+	}
+]
