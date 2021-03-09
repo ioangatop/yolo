@@ -90,7 +90,7 @@ class Detect(nn.Module):
 
 
 class YOLO(nn.Module):
-    def __init__(self, cfg='yolov4-p5.yaml', ch=3, nc=None, verbose=False):  # model, input channels, number of classes
+    def __init__(self, cfg='yolov4-p5.yaml', nc=None, ch=3, verbose=False):
         super(YOLO, self).__init__()
         if isinstance(cfg, dict):
             self.yaml = cfg  # model dict

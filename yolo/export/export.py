@@ -43,7 +43,7 @@ def setup_model(model):
             if isinstance(m.act, common.Mish):
                 m.act = Mish()
         if isinstance(m, Detect):
-            m.forward = m.forward_deploy
+            m.forward = m.forward_export
 
     model.eval()
     model.model[-1].export = True   # set Detect() layer export=True

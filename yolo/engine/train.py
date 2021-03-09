@@ -20,12 +20,18 @@ import os
 from yolo.utils.general import (
     check_img_size, torch_distributed_zero_first, labels_to_class_weights, plot_labels, check_anchors,
     labels_to_image_weights, compute_loss, plot_images, fitness, strip_optimizer, plot_results,
-    get_latest_run, check_git_status, check_file, increment_dir, print_mutation, plot_evolution)
+    get_latest_run, check_file, increment_dir, print_mutation, plot_evolution)
 from yolo.utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dicts
 from yolo.modeling import build_model
 from yolo.data import create_dataloader
 import yolo.engine.test as test     # import test.py to get mAP after each epoch
 
+
+
+"""
+    Training Script:
+        python -m torch.distributed.launch --nproc_per_node 4 yolo/engine/train.py --batch-size 32 --img 896 896 --sync-bn --device 0,1,2,3 --adam
+"""
 
 
 def train(hyp, opt, device, tb_writer=None):
@@ -59,10 +65,6 @@ def train(hyp, opt, device, tb_writer=None):
     # Model
     model = build_model(opt.cfg, weights, nc=int(data_dict['nc']), device=device)
 
-    half = False
-    if half:
-        model.half()
-
     # Optimizer
     nbs = 64  # nominal batch size
     accumulate = max(round(nbs / total_batch_size), 1)  # accumulate loss before optimizing
@@ -88,11 +90,9 @@ def train(hyp, opt, device, tb_writer=None):
     print('Optimizer groups: %g .bias, %g conv.weight, %g other' % (len(pg2), len(pg1), len(pg0)))
     del pg0, pg1, pg2
 
-    # Scheduler https://arxiv.org/pdf/1812.01187.pdf
-    # https://pytorch.org/docs/stable/_modules/torch/optim/lr_scheduler.html#OneCycleLR
+    # Scheduler
     lf = lambda x: (((1 + math.cos(x * math.pi / epochs)) / 2) ** 1.0) * 0.8 + 0.2  # cosine
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
-    # plot_lr_scheduler(optimizer, scheduler, epochs)
 
     # Resume
     start_epoch, best_fitness = 0, 0.0
@@ -220,13 +220,7 @@ def train(hyp, opt, device, tb_writer=None):
         optimizer.zero_grad()
         for i, (imgs, targets, paths, _) in pbar:  # batch -------------------------------------------------------------
             ni = i + nb * epoch  # number integrated batches (since train start)
-
-            if half:
-                imgs = imgs.to(device, non_blocking=True)
-                imgs = imgs.half() if half else imgs.float()  # uint8 to fp16/32
-                imgs /= 255.0  # 0 - 255 to 0.0 - 1.0
-            else:
-                imgs = imgs.to(device, non_blocking=True).float() / 255.0  # uint8 to float32, 0-255 to 0.0-1.0
+            imgs = imgs.to(device, non_blocking=True).float() / 255.0  # uint8 to float32, 0-255 to 0.0-1.0
 
             # Warmup
             if ni <= nw:
@@ -370,15 +364,11 @@ def train(hyp, opt, device, tb_writer=None):
 
 
 if __name__ == '__main__':
-    # python -m torch.distributed.launch --nproc_per_node 4 yolo/engine/train.py --batch-size 16 --img 896 896 --sync-bn --device 0,1,2,3 --resume
-    # Try
-    # 1. python -m torch.distributed.launch --nproc_per_node 4 yolo/engine/train.py --batch-size 32 --img 896 896 --sync-bn --device 0,1,2,3 --adam --resume
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model-cfg', default='../../models/COCO-Detection/yolov4-p5.yaml')
-    parser.add_argument('--model-weights', default='/workdir/runs/exp0/weights/best.pt')
-    # parser.add_argument('--model-weights', default='/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p5.pt')
-    parser.add_argument('--data-cfg', default='../../data/crowdhuman-visible_head.yaml', help='data.yaml path')
-    parser.add_argument('--train-cfg', type=str, default='../../configs/hyp-finetune.yaml', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
+    parser.add_argument('--data-cfg', default='/workdir/data/chess.yaml', help='The data configuration file path (.yaml).')
+    parser.add_argument('--train-cfg', type=str, default='/workdir/configs/cfg-finetune.yaml', help='hyperparameters path, i.e. data/hyp.scratch.yaml')
+    parser.add_argument('--model-cfg', default='/workdir/models/COCO-Detection/yolov4-p5.yaml', help='The model configuration file path (.yaml).')
+    parser.add_argument('--model-weights', default='/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p5.pt', help='Model weights.')
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
     parser.add_argument('--img-size', nargs='+', type=int, default=[896, 896], help='train,test sizes')
@@ -407,8 +397,6 @@ if __name__ == '__main__':
         if last and not opt.model_weights:
             print(f'Resuming training from {last}')
         opt.weights = last if opt.resume and not opt.model_weights else opt.model_weights
-    if opt.local_rank == -1 or ("RANK" in os.environ and os.environ["RANK"] == "0"):
-        check_git_status()
 
     opt.hyp = opt.train_cfg or ('./configs/hyp.finetune.yaml' if opt.model_weights else './configs/hyp.scratch.yaml')
     opt.data, opt.cfg, opt.hyp = check_file(opt.data_cfg), check_file(opt.model_cfg), check_file(opt.hyp)  # check files
