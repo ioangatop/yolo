@@ -19,10 +19,10 @@ def load_weights(model, weights, fused=False):
     return model
 
 
-def build_model(cfg, weights=None, nc=None, eval=False, fuse=False):
+def build_model(cfg, weights=None, nc=None, eval=False, fuse=False, device='cuda'):
     model = YOLO(cfg, nc=nc)
     if weights:
-        model = load_weights(model, weights, eval, device)
+        model = load_weights(model, weights, eval)
     if eval is True:
         model = model.eval()
     if fuse is True:

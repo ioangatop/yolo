@@ -30,7 +30,8 @@ import yolo.engine.test as test     # import test.py to get mAP after each epoch
 
 """
     Training Script:
-        python -m torch.distributed.launch --nproc_per_node 4 yolo/engine/train.py --batch-size 32 --img 896 896 --sync-bn --device 0,1,2,3 --adam
+        python -m torch.distributed.launch --nproc_per_node 4 yolo/engine/train.py --batch-size 32 --adam  --multi-scale --img 640 896 --sync-bn --device 0,1,2,3
+
 """
 
 
@@ -371,7 +372,7 @@ if __name__ == '__main__':
     parser.add_argument('--model-weights', default='/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p5.pt', help='Model weights.')
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[896, 896], help='train,test sizes')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[896, 896], choices=[416, 640, 896, 1280, 1536], help='train,test sizes')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--resume', nargs='?', const='get_last', default=False,
                         help='resume from given path/last.pt, or most recent run if blank')
