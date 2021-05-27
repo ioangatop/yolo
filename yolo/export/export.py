@@ -17,10 +17,11 @@ from yolo.modeling import build_model
 def get_args():
     parser = ArgumentParser(description='Model Export')
     parser.add_argument('--format', type=str, default='onnx', choices=['onnx'])
-    parser.add_argument('--model-cfg', type=str, default='./models/COCO-Detection/yolov4-p5.yaml')
-    parser.add_argument('--model-weights', type=str, default='/workdir/runs/exp0/weights/best.pt')
+    parser.add_argument('--model-cfg', default='./models/COCO-Detection/yolov4-p5.yaml')    
+    parser.add_argument('--model-weights', default='/media/braincreator/bigdata01/MODELS/yolo/weights/CrowdHuman/yolov4-p5.pt')
+    parser.add_argument('--num-classes', default=2)
     parser.add_argument('--batch-size', type=int, default=1)
-    parser.add_argument('--input-shape', type=int, default=[896, 1536], choices=[416, 640, 896, 1280, 1536])
+    parser.add_argument('--input-shape', type=int, default=[1280, 1280], choices=[416, 640, 896, 1280, 1536])
     parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'cuda'])
     parser.add_argument('--output', type=str, default='./out')
     args = parser.parse_args()
@@ -64,20 +65,6 @@ def to_onnx(input, model, save_as, verbose=True):
             output_names=['output']
         )
 
-        # TODO for batching
-        # input = input.unsqueeze(0)
-        # torch.onnx.export(
-        #     model,
-        #     input,
-        #     save_as,
-        #     opset_version=12,
-        #     do_constant_folding=True,
-        #     input_names=['input'],
-        #     output_names=['output'],
-        #     dynamic_axes={'input' : {0 : 'batch_size'},
-        #                   'output' : {0 : 'batch_size'}}
-        # )
-
     # validation checks
     onnx_model = onnx.load(save_as)
     model_simp, check = simplify(onnx_model)
@@ -101,7 +88,7 @@ def export_model(args):
     input = torch.zeros((args.batch_size, 3, *args.input_shape), requires_grad=False).to(args.device)
 
     print(' - Loading model...')
-    model = build_model(args.model_cfg, args.model_weights, nc=2, eval=True, device=args.device)
+    model = build_model(args.model_cfg, args.model_weights, nc=args.num_classes, eval=True, device=args.device)
     model = setup_model(model)
     model = model.to(args.device)
     model(input)

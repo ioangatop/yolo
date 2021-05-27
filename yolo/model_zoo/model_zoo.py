@@ -12,18 +12,17 @@ class _ModelZoo:
 
     # url
     MODEL_TO_URL = {
-        'yolov4-p5': 'https://drive.google.com/uc?id=1aXZZE999sHMP1gev60XhNChtHPRMH3Fz',
-        'yolov4-p6': 'https://drive.google.com/uc?id=1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf',
-        'yolov4-p7': 'https://drive.google.com/uc?id=18fGlzgEJTkUEiBG4hW00pyedJKNnYLP3'
-
+        'COCO2017/yolov4-p5': 'https://drive.google.com/uc?id=1aXZZE999sHMP1gev60XhNChtHPRMH3Fz',
+        'COCO2017/yolov4-p6': 'https://drive.google.com/uc?id=1aB7May8oPYzBqbgwYSZHuATPXyxh9xnf',
+        'COCO2017/yolov4-p7': 'https://drive.google.com/uc?id=18fGlzgEJTkUEiBG4hW00pyedJKNnYLP3'
     }
 
     # local
     MODEL_TO_WEIGHT = {
-        'yolov4-p5': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p5.pt',
-        'yolov4-p6': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p6.pt',
-        'yolov4-p7': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p7.pt'
-
+        'COCO2017/yolov4-p5': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p5.pt',
+        'COCO2017/yolov4-p6': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p6.pt',
+        'COCO2017/yolov4-p7': '/media/braincreator/bigdata01/MODELS/yolo/weights/COCO2017/yolov4-p7.pt',
+        'CrowdHuman/yolov4-p5': '/media/braincreator/bigdata01/MODELS/yolo/weights/CrowdHuman/yolov4-p5'
     }
 
 

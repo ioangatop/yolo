@@ -14,7 +14,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--onnx-model', type=str, default='./out/model.onnx')
     parser.add_argument('--input-image', type=str, default='/mnt/data/DATASETS/image-object-detection-datasets/crowd-human/val/273278,12fd4b000cf6622b4.jpg')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[896, 1536], help='inference size (pixels)')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[1280, 1280], help='inference size (pixels)')
     parser.add_argument('--data-cfg', default='./data/crowdhuman-visible_head.yaml', help='data.yaml path')
     parser.add_argument('--conf-thres', type=float, default=0.3, help='Object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='IOU threshold for NMS')
@@ -62,13 +62,12 @@ def main():
 
     # process input data
     target_image = cv2.imread(args.input_image)
-    input_image = input_preprocess(args.input_image)
+    input_image = input_preprocess(args.input_image, args.img_size)
     dict_input = {sess.get_inputs()[0].name: input_image}
 
     # inference
     pred = sess.run([], dict_input)[0]
     pred = torch.FloatTensor(pred)
-    pred /= 1000
 
     # non-maximum suppression
     pred = non_max_suppression(
