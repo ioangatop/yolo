@@ -15,9 +15,9 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--image-dir', type=str, default='/mnt/data/DATASETS/samples/human-crowd')
     parser.add_argument('--onnx-model', type=str, default='/workdir/tools/resources/model.onnx')
-    parser.add_argument('--img-size', nargs='+', type=int, default=[896, 1536], help='inference size (pixels)')
+    parser.add_argument('--img-size', nargs='+', type=int, default=[1280, 1280], help='inference size (pixels)')
     parser.add_argument('--data-cfg', default='/workdir/data/crowdhuman-visible_head.yaml', help='data.yaml path')
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='Object confidence threshold')
+    parser.add_argument('--conf-thres', type=float, default=0.2, help='Object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.4, help='IOU threshold for NMS')
     parser.add_argument('--agnostic-nms', action='store_true', help='Class-agnostic NMS')
     parser.add_argument('--max_det', type=int, default=1000, help='Maximum detections')
@@ -29,7 +29,7 @@ def get_args():
 
 
 class ImageLoader:
-    def __init__(self, path, size=[896, 1536], valid_exts=('.jpg', '.jpeg', '.png'), level=None, contains=None):
+    def __init__(self, path, size=[1280, 1280], valid_exts=('.jpg', '.jpeg', '.png'), level=None, contains=None):
         super().__init__()
         self.path = path
         self.size = size

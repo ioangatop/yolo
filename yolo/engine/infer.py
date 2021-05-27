@@ -19,7 +19,7 @@ def get_args():
     parser.add_argument('--data-cfg', default='./data/crowdhuman-visible_head.yaml', help='data.yaml path')
     parser.add_argument('--model-cfg', default='./models/COCO-Detection/yolov4-p5.yaml')    
     parser.add_argument('--model-weights', default='/media/braincreator/bigdata01/MODELS/yolo/weights/CrowdHuman/yolov4-p5.pt')
-    parser.add_argument('--input-size', type=int, default=896, choices=[416, 640, 896, 1280, 1536])
+    parser.add_argument('--input-size', type=int, default=1280, choices=[416, 640, 896, 1280, 1536])
     parser.add_argument('--max-det', type=int, default=1000)
     parser.add_argument('--conf-thres', type=float, default=0.25, help='Object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='IOU threshold for NMS')
